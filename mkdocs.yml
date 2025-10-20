@@ -4,3 +4,5 @@ theme:
 
 nav:
   - Home: index.md
+  - Domain: domain.md
+  - Design: design.md
