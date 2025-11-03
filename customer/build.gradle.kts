@@ -1,7 +1,5 @@
 plugins {
     id("java")
-    id("org.springframework.boot") version "3.3.5"
-    id("io.spring.dependency-management") version "1.1.6"
 }
 
 group = "org.example"
@@ -12,12 +10,15 @@ repositories {
 }
 
 dependencies {
-    implementation("org.apache.commons:commons-text:1.14.0")
-    implementation("org.springframework.boot:spring-boot-starter-amqp")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation(project("common"))
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.amqp:spring-rabbit-test")
+    // RabbitMQ client
+    implementation("com.rabbitmq:amqp-client:5.20.0")
+
+    // Logging
+    implementation("org.slf4j:slf4j-api:2.0.9")
+    implementation("org.slf4j:slf4j-simple:2.0.9")
+
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -29,6 +30,9 @@ tasks.test {
 
 tasks.jar {
     manifest {
-        attributes("Main-Class" to "org.example.Main")
+        attributes("Main-Class" to "org.example.CustomerService")
     }
+    // Include dependencies in the JAR
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
