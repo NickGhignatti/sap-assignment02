@@ -9,15 +9,8 @@ import java.util.Objects;
  * Shared message class for order information.
  * This class will be used across all microservices (customer, delivery, drone).
  */
-public class OrderMessage {
-    private final String orderId;
-    private final String customerId;
-    private final String fromAddress;
-    private final String toAddress;
-    private final double packageWeight;
-    private final LocalDateTime requestedDeliveryTime;
-    private final int maxDeliveryTimeMinutes;
-
+public record OrderMessage(String orderId, String customerId, String fromAddress, String toAddress,
+                           double packageWeight, LocalDateTime requestedDeliveryTime, int maxDeliveryTimeMinutes) {
     @JsonCreator
     public OrderMessage(
             @JsonProperty("orderId") String orderId,
@@ -35,15 +28,6 @@ public class OrderMessage {
         this.requestedDeliveryTime = requestedDeliveryTime;
         this.maxDeliveryTimeMinutes = maxDeliveryTimeMinutes;
     }
-
-    // Getters
-    public String getOrderId() { return orderId; }
-    public String getCustomerId() { return customerId; }
-    public String getFromAddress() { return fromAddress; }
-    public String getToAddress() { return toAddress; }
-    public double getPackageWeight() { return packageWeight; }
-    public LocalDateTime getRequestedDeliveryTime() { return requestedDeliveryTime; }
-    public int getMaxDeliveryTimeMinutes() { return maxDeliveryTimeMinutes; }
 
     @Override
     public boolean equals(Object o) {
