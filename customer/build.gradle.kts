@@ -32,7 +32,7 @@ tasks.test {
 
 tasks.jar {
     manifest {
-        attributes("Main-Class" to "org.example.CustomerService")
+        attributes("Main-Class" to "org.example.CustomerApplication")
     }
     // Include dependencies in the JAR
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })

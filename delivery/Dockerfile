@@ -1,9 +1,9 @@
 FROM gradle:9.1.0-jdk21 AS Builder
 WORKDIR /home/gradle/src
 COPY . .
-RUN gradle :delivery:build --no-daemon
+RUN gradle :delivery:bootJar --no-daemon
 
-FROM openjdk:21-jdk
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
 COPY --from=Builder /home/gradle/src/delivery/build/libs/*.jar /app/app.jar
 EXPOSE 8080

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: delivery-service
+    name: drone-service
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     username: ${RABBITMQ_USER:guest}

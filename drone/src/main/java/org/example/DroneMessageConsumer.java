@@ -6,15 +6,10 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OrderMessageConsumer {
-    private final DeliveryService deliveryService;
-    private static final Logger logger = LoggerFactory.getLogger(OrderMessageConsumer.class);
+public class DroneMessageConsumer {
+    private static final Logger logger = LoggerFactory.getLogger(DroneMessageConsumer.class);
 
-    public OrderMessageConsumer(DeliveryService deliveryService) {
-        this.deliveryService = deliveryService;
-    }
-
-    @RabbitListener(queues = RabbitMqConfig.ORDER_QUEUE)
+    @RabbitListener(queues = RabbitMqConfig.DRONE_QUEUE)
     public void processOrderMessage(OrderMessage orderMessage) {
         try {
             logger.info("Received order message: {}", orderMessage);
@@ -27,14 +22,7 @@ public class OrderMessageConsumer {
 
             logger.info("Successfully processed order: {}", orderMessage.orderId());
 
-            deliveryService.askDroneForOrder(
-                    orderMessage.customerId(),
-                    orderMessage.fromAddress(),
-                    orderMessage.toAddress(),
-                    orderMessage.packageWeight(),
-                    orderMessage.requestedDeliveryTime(),
-                    orderMessage.maxDeliveryTimeMinutes()
-            );
+            // TODO : logic for sending drones
 
         } catch (Exception e) {
             logger.error("Error processing order message: {}", orderMessage, e);

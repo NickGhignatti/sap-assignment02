@@ -3,7 +3,7 @@ WORKDIR /home/gradle/src
 COPY . .
 RUN gradle :customer:bootJar --no-daemon
 
-FROM openjdk:21-jdk
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
 COPY --from=Builder /home/gradle/src/customer/build/libs/*.jar /app/app.jar
 EXPOSE 8080

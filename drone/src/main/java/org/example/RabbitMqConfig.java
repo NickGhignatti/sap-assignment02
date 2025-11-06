@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitMqConfig {
-
-    public static final String ORDER_QUEUE = "order_queue";
     public static final String DRONE_QUEUE = "drone_queue";
 
     @Value("${spring.rabbitmq.host:localhost}")
@@ -25,12 +23,9 @@ public class RabbitMqConfig {
     private String rabbitmqPassword;
 
     @Bean
-    public Queue orderQueue() {
-        return new Queue(ORDER_QUEUE, true);
+    public Queue droneQueue() {
+        return new Queue(DRONE_QUEUE, true);
     }
-
-    @Bean
-    public Queue droneQueue() { return new Queue(DRONE_QUEUE, true); }
 
     @Bean
     public ConnectionFactory connectionFactory() {

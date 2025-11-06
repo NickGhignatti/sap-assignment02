@@ -32,7 +32,7 @@ tasks.test {
 
 tasks.jar {
     manifest {
-        attributes("Main-Class" to "org.example.DeliveryService")
+        attributes("Main-Class" to "org.example.DeliveryApplication")
     }
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
