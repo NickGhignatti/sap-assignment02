@@ -7,14 +7,15 @@ enum DroneState {
     InTransit,
     Returning
 }
+
 public class Drone {
     private final String droneId;
     private final OrderMessage order;
     private DroneState state = DroneState.Sleeping;
 
     public Drone(final OrderMessage order) {
-       this.droneId = UUID.randomUUID().toString();
-       this.order = order;
+        this.droneId = UUID.randomUUID().toString();
+        this.order = order;
     }
 
     public String getId() {
@@ -23,11 +24,14 @@ public class Drone {
 
     public void start() {
         this.state = DroneState.InTransit;
-        System.out.println("Drone " + this.droneId + " delivering to " + this.order.toAddress());
     }
 
     public void end() {
         this.state = DroneState.Returning;
-        System.out.println("Drone " + this.droneId + " ended the delivery");
+    }
+
+    @Override
+    public String toString() {
+        return "Drone " + this.getId() + " " + this.state + " from " + order.fromAddress() + " to " + order.toAddress();
     }
 }

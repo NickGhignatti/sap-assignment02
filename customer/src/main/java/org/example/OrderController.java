@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
-    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
     private final OrderService orderService;
 
     public OrderController(OrderService orderService) {
@@ -20,10 +19,6 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderMessage> createOrder(@RequestBody CreateOrderRequest request) {
-        logger.info("Received order creation request: from {} to {}",
-                request.getFromAddress(), request.getToAddress());
-
-        // Use current time if not specified
         LocalDateTime deliveryTime = request.getRequestedDeliveryTime() != null
                 ? request.getRequestedDeliveryTime()
                 : LocalDateTime.now().plusHours(2);

@@ -10,7 +10,6 @@ import java.util.UUID;
 
 @Service
 public class OrderService {
-    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
     private final RabbitTemplate rabbitTemplate;
 
     public OrderService(RabbitTemplate rabbitTemplate) {
@@ -35,8 +34,6 @@ public class OrderService {
 
         // Send to RabbitMQ
         rabbitTemplate.convertAndSend(RabbitMqConfig.ORDER_QUEUE, order);
-
-        logger.info("Order created and sent to queue: {}", order);
 
         return order;
     }

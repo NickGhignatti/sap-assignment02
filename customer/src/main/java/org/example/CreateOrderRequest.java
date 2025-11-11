@@ -9,14 +9,12 @@ public class CreateOrderRequest {
     private String fromAddress;
     private String toAddress;
     private double packageWeight;
-
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime requestedDeliveryTime;
-
     private int maxDeliveryTimeMinutes;
 
-    // Constructors
-    public CreateOrderRequest() {}
+    public CreateOrderRequest() {
+    }
 
     public CreateOrderRequest(String customerId, String fromAddress, String toAddress,
                               double packageWeight, LocalDateTime requestedDeliveryTime,
@@ -29,26 +27,27 @@ public class CreateOrderRequest {
         this.maxDeliveryTimeMinutes = maxDeliveryTimeMinutes;
     }
 
-    // Getters and Setters
-    public String getCustomerId() { return customerId; }
-    public void setCustomerId(String customerId) { this.customerId = customerId; }
-
-    public String getFromAddress() { return fromAddress; }
-    public void setFromAddress(String fromAddress) { this.fromAddress = fromAddress; }
-
-    public String getToAddress() { return toAddress; }
-    public void setToAddress(String toAddress) { this.toAddress = toAddress; }
-
-    public double getPackageWeight() { return packageWeight; }
-    public void setPackageWeight(double packageWeight) { this.packageWeight = packageWeight; }
-
-    public LocalDateTime getRequestedDeliveryTime() { return requestedDeliveryTime; }
-    public void setRequestedDeliveryTime(LocalDateTime requestedDeliveryTime) {
-        this.requestedDeliveryTime = requestedDeliveryTime;
+    public String getCustomerId() {
+        return customerId;
     }
 
-    public int getMaxDeliveryTimeMinutes() { return maxDeliveryTimeMinutes; }
-    public void setMaxDeliveryTimeMinutes(int maxDeliveryTimeMinutes) {
-        this.maxDeliveryTimeMinutes = maxDeliveryTimeMinutes;
+    public String getFromAddress() {
+        return fromAddress;
+    }
+
+    public String getToAddress() {
+        return toAddress;
+    }
+
+    public double getPackageWeight() {
+        return packageWeight;
+    }
+
+    public LocalDateTime getRequestedDeliveryTime() {
+        return requestedDeliveryTime;
+    }
+
+    public int getMaxDeliveryTimeMinutes() {
+        return maxDeliveryTimeMinutes;
     }
 }

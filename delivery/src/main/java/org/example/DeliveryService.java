@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Service
 public class DeliveryService {
-    private static final Logger logger = LoggerFactory.getLogger(DeliveryService.class);
     private final RabbitTemplate rabbitTemplate;
 
     public DeliveryService(RabbitTemplate rabbitTemplate) {
@@ -28,7 +27,5 @@ public class DeliveryService {
                 packageWeight, requestedDeliveryTime, maxDeliveryTimeMinutes);
 
         rabbitTemplate.convertAndSend(RabbitMqConfig.DRONE_QUEUE, order);
-
-        logger.info("Order created and sent to drone queue: {}", order);
     }
 }

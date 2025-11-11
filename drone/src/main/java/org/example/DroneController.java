@@ -1,5 +1,7 @@
 package org.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,8 +25,8 @@ public class DroneController {
 
     @GetMapping
     public ResponseEntity<String> createOrder(@RequestBody DroneRequest request) {
-        if (dispatchedDrones.containsKey(request.getDroneId())) {
-            return ResponseEntity.ok(dispatchedDrones.get(request.getDroneId()).toString());
+        if (dispatchedDrones.containsKey(request.orderId())) {
+            return ResponseEntity.ok(dispatchedDrones.get(request.orderId()).toString());
         } else {
             return ResponseEntity.notFound().build();
         }
