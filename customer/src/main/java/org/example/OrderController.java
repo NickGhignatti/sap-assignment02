@@ -17,17 +17,17 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderMessage> createOrder(@RequestBody CreateOrderRequest request) {
-        LocalDateTime deliveryTime = request.getRequestedDeliveryTime() != null
-                ? request.getRequestedDeliveryTime()
+        LocalDateTime deliveryTime = request.requestedDeliveryTime() != null
+                ? request.requestedDeliveryTime()
                 : LocalDateTime.now().plusHours(2);
 
         OrderMessage order = orderService.createOrder(
-                request.getCustomerId(),
-                request.getFromAddress(),
-                request.getToAddress(),
-                request.getPackageWeight(),
+                request.customerId(),
+                request.fromAddress(),
+                request.toAddress(),
+                request.packageWeight(),
                 deliveryTime,
-                request.getMaxDeliveryTimeMinutes()
+                request.maxDeliveryTimeMinutes()
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
