@@ -17,7 +17,7 @@ The system manages the delivery of packages using drones, involving the followin
 - A Delivery is assigned to a Drone.
 - The Drone transports the Package from the source to the destination.
 
-### Glossary
+### Ubiquitous language
 
 - **Customer**: A user who requests a delivery.
 - **Package**: The object to be delivered.
@@ -29,6 +29,16 @@ The system manages the delivery of packages using drones, involving the followin
 - **Order Management Context** : Managing customer orders and order lifecycle
 - **Delivery Coordination Context** : Coordinating deliveries between orders and drones
 - **Drone Context** : Managing drone fleet and individual drone operations
+
+| Bounded Context                | Responsibility                                                                                                     | Mapped Service     |
+|:-------------------------------|:-------------------------------------------------------------------------------------------------------------------|:-------------------|
+| **Order Acquisition Context**  | Handles the interaction with the customer, validates order requests, and captures the intent to ship a package.    | `customer-service` |
+| **Delivery Logistics Context** | Orchestrates the fulfillment of an order. It acts as the "brain" that decides how and when a delivery is executed. | `delivery-service` |
+| **Drone Fleet Context**        | Manages the physical resources (drones), their lifecycle (state changes), and physical movement simulation.        | `drone-service`    |
+
+### Context Map
+
+![Context Map](resource/context_map.png)
 
 ### Example Order Flow
 
