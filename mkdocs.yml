@@ -5,6 +5,7 @@ theme:
 nav:
   - Home: index.md
   - Domain: domain.md
+  - Analysis: analysis.md
   - Design: design.md
   - Api: api.md
   - Deployement: deployment.md

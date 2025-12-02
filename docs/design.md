@@ -10,3 +10,5 @@ microservices, but I decided also to add a "middleman" in order to allow more co
 ### Design
 
 ![App diagram](resource/app_diagram.png)
+
+![Sequence diagram](resource/sequence.png)
