@@ -23,6 +23,8 @@ public class DroneMessageConsumer {
                 throw new IllegalArgumentException("Order ID cannot be null or empty");
             }
 
+            logger.info("Received order message: {}", orderMessage);
+
             Thread thread = new Thread(() -> {
                 Drone drone = new Drone(orderMessage);
                 drone.start();
@@ -30,6 +32,7 @@ public class DroneMessageConsumer {
 
                 Random rand = new Random();
                 try {
+                    logger.info("Sleeping for {} minutes", orderMessage.maxDeliveryTimeMinutes());
                     int sleepMinutes = rand.nextInt(orderMessage.maxDeliveryTimeMinutes()) + 1;
                     Thread.sleep(sleepMinutes * 60_000L);
                 } catch (InterruptedException e) {

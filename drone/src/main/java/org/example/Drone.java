@@ -1,5 +1,8 @@
 package org.example;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 enum DroneState {
@@ -11,11 +14,13 @@ enum DroneState {
 public class Drone {
     private final String droneId;
     private final OrderMessage order;
+    private final LocalDateTime deliveryStartTime;
     private DroneState state = DroneState.Sleeping;
 
     public Drone(final OrderMessage order) {
         this.droneId = UUID.randomUUID().toString();
         this.order = order;
+        this.deliveryStartTime = LocalDateTime.now();
     }
 
     public String getId() {
@@ -32,6 +37,9 @@ public class Drone {
 
     @Override
     public String toString() {
-        return "Drone " + this.getId() + " " + this.state + " from " + order.fromAddress() + " to " + order.toAddress();
+        Duration elapsed = Duration.between(this.deliveryStartTime, LocalDateTime.now());
+        long nanos = elapsed.toNanos();
+        LocalTime timeDisplay = LocalTime.ofNanoOfDay(nanos % 86400000000000L);
+        return "Drone " + this.getId() + " " + this.state + " from " + order.fromAddress() + " to " + order.toAddress() + " in " + timeDisplay;
     }
 }

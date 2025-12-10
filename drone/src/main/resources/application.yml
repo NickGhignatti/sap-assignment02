@@ -13,4 +13,4 @@ server:
 logging:
   level:
     org.example: INFO
-    org.springframework.amqp: DEBUG
+    org.springframework.amqp: WARN
