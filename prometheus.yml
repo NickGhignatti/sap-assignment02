@@ -1,0 +1,10 @@
+global:
+    scrape_interval: 60s
+
+scrape_configs:
+    - job_name: 'sap-assignment'
+      metrics_path: '/actuator/prometheus'
+      static_configs:
+          - targets: ['customer:8080', 'delivery:8080', 'drone:8080']
+            labels:
+                application: 'sap-microservices'

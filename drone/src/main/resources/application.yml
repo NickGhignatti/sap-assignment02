@@ -14,3 +14,15 @@ logging:
   level:
     org.example: INFO
     org.springframework.amqp: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus # Expose the health and prometheus endpoints
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
