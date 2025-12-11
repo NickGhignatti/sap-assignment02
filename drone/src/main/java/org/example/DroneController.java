@@ -29,4 +29,9 @@ public class DroneController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Drone service is running");
+    }
 }
