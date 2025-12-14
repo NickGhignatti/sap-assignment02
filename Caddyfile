@@ -1,0 +1,26 @@
+:80 {
+    # Customer Service
+    handle_path /api/orders* {
+        reverse_proxy customer:8080
+    }
+
+    # Drone Service
+    handle_path /api/drones* {
+        reverse_proxy drone:8080
+    }
+
+    # Prometheus
+    handle /metrics* {
+        reverse_proxy prometheus:9090
+    }
+
+    handle /customer/actuator* {
+        uri strip_prefix /customer
+        reverse_proxy customer:8080
+    }
+
+    handle /drone/actuator* {
+        uri strip_prefix /drone
+        reverse_proxy drone:8080
+    }
+}

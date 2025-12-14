@@ -1,19 +1,18 @@
 services:
-  traefik:
-    image: traefik:v2.10
-    container_name: traefik
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
+  caddy:
+    image: caddy:2
+    container_name: caddy
     ports:
-      - "8080:80"      # API gateway
-      - "8081:8080"    # Traefik dashboard
+      - "8080:80"
+      - "8081:2019"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    logging:
-      driver: none
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - customer
+      - drone
+      - prometheus
 
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -30,8 +29,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    logging:
-      driver: none
 
   customer:
     build:
@@ -39,11 +36,6 @@ services:
       dockerfile: customer/Dockerfile
     environment:
       RABBITMQ_HOST: rabbitmq
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.customer.rule=PathPrefix(`/api/orders`)"
-      - "traefik.http.routers.customer.entrypoints=web"
-      - "traefik.http.services.customer.loadbalancer.server.port=8080"
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -69,11 +61,6 @@ services:
       dockerfile: drone/Dockerfile
     environment:
       RABBITMQ_HOST: rabbitmq
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.drone.rule=PathPrefix(`/api/drones`)"
-      - "traefik.http.routers.drone.entrypoints=web"
-      - "traefik.http.services.drone.loadbalancer.server.port=8080"
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -88,13 +75,10 @@ services:
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.prometheus.rule=PathPrefix(`/metrics`)"
-      - "traefik.http.routers.prometheus.entrypoints=web"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.external-url=/metrics'
-    networks:
-      - default
+
+volumes:
+  caddy_data:
+  caddy_config:

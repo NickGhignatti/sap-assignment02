@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 
 @RestController
-@RequestMapping("/api/drones")
+@RequestMapping("/")
 public class DroneController {
     private final HashMap<String, Drone> dispatchedDrones = new HashMap<>();
 
@@ -19,6 +19,10 @@ public class DroneController {
 
     public void detachDrone(final String droneId) {
         this.dispatchedDrones.remove(droneId);
+    }
+
+    public HashMap<String, Drone> getCurrentDispatchedDrones() {
+        return this.dispatchedDrones;
     }
 
     @GetMapping

@@ -1,19 +1,24 @@
 package org.example;
 
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.Random;
 
 @Service
 public class DroneMessageConsumer {
     private static final Logger logger = LoggerFactory.getLogger(DroneMessageConsumer.class);
     private final DroneController controller;
+    private final Gauge drones;
 
-    public DroneMessageConsumer(final DroneController controller) {
+    public DroneMessageConsumer(final DroneController controller, MeterRegistry registry) {
         this.controller = controller;
+        this.drones = Gauge.builder("drone_sent", controller, c -> c.getCurrentDispatchedDrones().size()).description("Total numbers of drones sent").register(registry);
     }
 
     @RabbitListener(queues = RabbitMqConfig.DRONE_QUEUE)
