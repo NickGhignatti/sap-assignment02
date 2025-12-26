@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
+import org.springframework.data.mongodb.mapping.Document;
+import org.springframework.data.annotation.Id;
 
 enum DroneState {
     Sleeping,
@@ -11,7 +13,9 @@ enum DroneState {
     Returning
 }
 
+@Document(collection = "sourcing")
 public class Drone {
+    @Id
     private final String droneId;
     private final OrderMessage order;
     private final LocalDateTime deliveryStartTime;

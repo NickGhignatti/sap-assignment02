@@ -13,6 +13,7 @@ services:
       - customer
       - drone
       - prometheus
+      - mongodb
 
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -29,6 +30,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
 
   customer:
     build:
@@ -82,3 +91,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  mongo_data:

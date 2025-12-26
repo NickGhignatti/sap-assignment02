@@ -14,6 +14,11 @@
         reverse_proxy prometheus:9090
     }
 
+    # MongoDb
+    handle /db* {
+        reverse_proxy mongodb:27017
+    }
+
     handle /customer/actuator* {
         uri strip_prefix /customer
         reverse_proxy customer:8080

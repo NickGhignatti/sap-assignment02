@@ -1,4 +1,7 @@
 spring:
+  data:
+    mongodb:
+      uri: mongodb://mongodb:27017/sourcing
   application:
     name: drone-service
   rabbitmq:

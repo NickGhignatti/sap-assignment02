@@ -28,6 +28,9 @@ dependencies {
     // Prometheus
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
+
+    // Mongo
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 }
 
 tasks.test {
