@@ -77,7 +77,7 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--web.external-url=/metrics'
+      - '--web.external-url=/prometheus'
 
 volumes:
   caddy_data:

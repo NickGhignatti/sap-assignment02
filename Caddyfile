@@ -10,7 +10,7 @@
     }
 
     # Prometheus
-    handle /metrics* {
+    handle /prometheus* {
         reverse_proxy prometheus:9090
     }
 
