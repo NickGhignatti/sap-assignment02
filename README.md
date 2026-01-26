@@ -4,6 +4,6 @@ Pattern applied:
 - [x] Api gateway
 - [x] Health check
 - [x] Metrics
-- [ ] Event sourcing
+- [x] Event sourcing
 - [ ] ???
 - [ ] ???

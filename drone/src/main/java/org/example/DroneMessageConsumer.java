@@ -7,18 +7,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalTime;
 import java.util.Random;
 
+/**
+ * Consumer that processes order messages and creates drone deliveries
+ * using Event Sourcing pattern to track all state changes.
+ */
 @Service
 public class DroneMessageConsumer {
     private static final Logger logger = LoggerFactory.getLogger(DroneMessageConsumer.class);
     private final DroneController controller;
+    private final DroneService droneService;
     private final Gauge drones;
 
-    public DroneMessageConsumer(final DroneController controller, MeterRegistry registry) {
+    public DroneMessageConsumer(final DroneController controller,
+                                final DroneService droneService,
+                                MeterRegistry registry) {
         this.controller = controller;
-        this.drones = Gauge.builder("drone_sent", controller, c -> c.getCurrentDispatchedDrones().size()).description("Total numbers of drones sent").register(registry);
+        this.droneService = droneService;
+        this.drones = Gauge.builder("drone_sent", controller,
+                        c -> c.getCurrentDispatchedDrones().size())
+                .description("Total numbers of drones sent")
+                .register(registry);
     }
 
     @RabbitListener(queues = RabbitMqConfig.DRONE_QUEUE)
@@ -30,22 +40,18 @@ public class DroneMessageConsumer {
 
             logger.info("Received order message: {}", orderMessage);
 
+            // Process delivery asynchronously using event sourcing
             Thread thread = new Thread(() -> {
-                Drone drone = new Drone(orderMessage);
-                drone.start();
-                controller.attachDrone(orderMessage.orderId(), drone);
-
                 Random rand = new Random();
-                try {
-                    logger.info("Sleeping for {} minutes", orderMessage.maxDeliveryTimeMinutes());
-                    int sleepMinutes = rand.nextInt(orderMessage.maxDeliveryTimeMinutes()) + 1;
-                    Thread.sleep(sleepMinutes * 60_000L);
-                } catch (InterruptedException e) {
-                    logger.error(e.getMessage());
-                }
+                int sleepMinutes = rand.nextInt(orderMessage.maxDeliveryTimeMinutes()) + 1;
 
-                drone.end();
-                controller.detachDrone(drone.getId());
+                logger.info("Processing delivery for order {} (estimated {} minutes)",
+                        orderMessage.orderId(), sleepMinutes);
+
+                // Use DroneService which implements event sourcing
+                droneService.processDroneDelivery(orderMessage, sleepMinutes);
+
+                logger.info("Completed delivery for order {}", orderMessage.orderId());
             });
 
             thread.start();

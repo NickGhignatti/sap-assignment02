@@ -8,11 +8,11 @@
         <option name="gradleHome" value="" />
         <option name="modules">
           <set>
-            <option value="$USER_HOME$/Documents/University/sap/sap-assignment02" />
-            <option value="$USER_HOME$/Documents/University/sap/sap-assignment02/common" />
-            <option value="$USER_HOME$/Documents/University/sap/sap-assignment02/customer" />
-            <option value="$USER_HOME$/Documents/University/sap/sap-assignment02/delivery" />
-            <option value="$USER_HOME$/Documents/University/sap/sap-assignment02/drone" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/common" />
+            <option value="$PROJECT_DIR$/customer" />
+            <option value="$PROJECT_DIR$/delivery" />
+            <option value="$PROJECT_DIR$/drone" />
           </set>
         </option>
       </GradleProjectSettings>
