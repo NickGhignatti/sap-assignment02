@@ -45,9 +45,12 @@ services:
       dockerfile: customer/Dockerfile
     environment:
       RABBITMQ_HOST: rabbitmq
+      MONGODB_URI: mongodb://mongodb:27017/customer_db
     depends_on:
       rabbitmq:
         condition: service_healthy
+      mongodb:
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/orders/health"]
       interval: 30s
@@ -70,9 +73,12 @@ services:
       dockerfile: drone/Dockerfile
     environment:
       RABBITMQ_HOST: rabbitmq
+      MONGODB_URI: mongodb://mongodb:27017/drone_db
     depends_on:
       rabbitmq:
         condition: service_healthy
+      mongodb:
+        condition: service_started
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api/drones/health"]
       interval: 30s

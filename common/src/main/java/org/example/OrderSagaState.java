@@ -157,24 +157,3 @@ public class OrderSagaState {
     public void setDroneId(String droneId) { this.droneId = droneId; }
 }
 
-/**
- * Status of the SAGA
- */
-enum SagaStatus {
-    STARTED,        // SAGA has started
-    IN_PROGRESS,    // Executing steps
-    COMPLETED,      // All steps completed successfully
-    FAILED,         // A step failed
-    COMPENSATING,   // Rolling back completed steps
-    COMPENSATED     // Rollback completed
-}
-
-/**
- * Steps in the order processing SAGA
- */
-enum SagaStep {
-    ORDER_VALIDATION,      // Step 1: Validate order in customer service
-    DELIVERY_SCHEDULING,   // Step 2: Schedule delivery in delivery service
-    DRONE_ASSIGNMENT,      // Step 3: Assign drone in drone service
-    COMPLETED              // All steps done
-}

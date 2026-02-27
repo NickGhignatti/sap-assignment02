@@ -1,9 +1,9 @@
 spring:
-  data:
-    mongodb:
-      uri: mongodb://mongodb:27017/sourcing
   application:
     name: drone-service
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/drone_db}
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     username: ${RABBITMQ_USER:guest}

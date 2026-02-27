@@ -20,9 +20,10 @@ public class Drone {
     private final OrderMessage order;
     private final LocalDateTime deliveryStartTime;
     private DroneState state = DroneState.Sleeping;
+    private LocalDateTime returnTime;
     private LocalDateTime dispatchTime;
     private LocalDateTime deliveryTime;
-    private LocalDateTime returnTime;
+    private LocalDateTime expectedArrivalTime;
 
     // Constructor for new drones
     public Drone(final OrderMessage order) {
@@ -64,6 +65,14 @@ public class Drone {
 
     public LocalDateTime getReturnTime() {
         return this.returnTime;
+    }
+
+    public LocalDateTime getExpectedArrivalTime() {
+        return expectedArrivalTime;
+    }
+
+    public void setExpectedArrivalTime(LocalDateTime expectedArrivalTime) {
+        this.expectedArrivalTime = expectedArrivalTime;
     }
 
     public void start() {

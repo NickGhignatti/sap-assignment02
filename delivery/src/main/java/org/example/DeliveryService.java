@@ -4,6 +4,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class DeliveryService {
@@ -25,5 +26,14 @@ public class DeliveryService {
                 packageWeight, requestedDeliveryTime, maxDeliveryTimeMinutes);
 
         rabbitTemplate.convertAndSend(RabbitMqConfig.DRONE_QUEUE, order);
+
+        String deliveryId = UUID.randomUUID().toString();
+        DeliveryScheduledEvent event = new DeliveryScheduledEvent(
+                "unknown",
+                orderId,
+                deliveryId,
+                LocalDateTime.now()
+        );
+        rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE, "saga.delivery.scheduled", event);
     }
 }

@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 /**
  * Orchestrator for the Order SAGA pattern.
  *
- * SAGA Flow:
+ * SAGA Flow (Asynchronous):
  * 1. Validate Order (Customer Service)
  * 2. Schedule Delivery (Delivery Service)
  * 3. Assign Drone (Drone Service)
@@ -119,8 +120,17 @@ public class OrderSagaOrchestrator {
 
             logger.info("SAGA {}: Order validated successfully", saga.getSagaId());
 
-            // Move to next step
-            scheduleDelivery(saga);
+            // Initiate Step 2 (Delivery Scheduling) by sending the order to the Delivery Service
+            OrderMessage deliveryRequest = new OrderMessage(
+                    saga.getOrderId(), saga.getCustomerId(), saga.getFromAddress(),
+                    saga.getToAddress(), saga.getPackageWeight(),
+                    saga.getRequestedDeliveryTime(), saga.getMaxDeliveryTimeMinutes()
+            );
+
+            rabbitTemplate.convertAndSend(RabbitMqConfig.ORDER_QUEUE, deliveryRequest);
+            logger.info("SAGA {}: Order sent to the Delivery Service. Waiting for response...", saga.getSagaId());
+
+            // The orchestrator stops here and waits for asynchronous events.
 
         } catch (Exception e) {
             logger.error("SAGA {}: Order validation failed", saga.getSagaId(), e);
@@ -129,90 +139,44 @@ public class OrderSagaOrchestrator {
     }
 
     /**
-     * Step 2: Schedule delivery
+     * UNIFIED ASYNCHRONOUS LISTENER: Reacts to events published by other microservices.
      */
-    private void scheduleDelivery(OrderSagaState saga) {
-        logger.info("SAGA {}: Scheduling delivery for order {}",
-                saga.getSagaId(), saga.getOrderId());
+    @RabbitListener(queues = RabbitMqConfig.SAGA_EVENTS_QUEUE)
+    public void handleSagaEvents(SagaEvent event) {
 
-        try {
-            // Simulate delivery scheduling
-            String deliveryId = UUID.randomUUID().toString();
-            saga.setDeliveryId(deliveryId);
+        // Generic Log
+        logger.info("SAGA Event Received: {} for order {}", event.getEventType(), event.getOrderId());
 
-            // Send to delivery service
-            OrderMessage deliveryRequest = new OrderMessage(
-                    saga.getOrderId(),
-                    saga.getCustomerId(),
-                    saga.getFromAddress(),
-                    saga.getToAddress(),
-                    saga.getPackageWeight(),
-                    saga.getRequestedDeliveryTime(),
-                    saga.getMaxDeliveryTimeMinutes()
-            );
+        if (event instanceof DeliveryScheduledEvent) {
+            DeliveryScheduledEvent deliveryEvent = (DeliveryScheduledEvent) event;
 
-            rabbitTemplate.convertAndSend(RabbitMqConfig.ORDER_QUEUE, deliveryRequest);
+            OrderSagaState saga = sagaRepository.findByOrderId(deliveryEvent.getOrderId()).orElse(null);
+            if (saga != null) {
+                saga.setDeliveryId(deliveryEvent.getDeliveryId());
+                saga.markStepCompleted(SagaStep.DELIVERY_SCHEDULING);
+                saga.moveToNextStep(); // Moves to DRONE_ASSIGNMENT
+                sagaRepository.save(saga);
+                logger.info("SAGA {}: Delivery planned notification received (DeliveryID: {})",
+                        saga.getSagaId(), deliveryEvent.getDeliveryId());
+            }
 
-            // Mark step completed
-            saga.markStepCompleted(SagaStep.DELIVERY_SCHEDULING);
-            saga.moveToNextStep();
-            sagaRepository.save(saga);
+        } else if (event instanceof DroneAssignedEvent) {
+            DroneAssignedEvent droneEvent = (DroneAssignedEvent) event;
 
-            // Publish success event
-            DeliveryScheduledEvent event = new DeliveryScheduledEvent(
-                    saga.getSagaId(), saga.getOrderId(), deliveryId, LocalDateTime.now()
-            );
-            rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE,
-                    "saga.delivery.scheduled", event);
+            OrderSagaState saga = sagaRepository.findByOrderId(droneEvent.getOrderId()).orElse(null);
+            if (saga != null) {
+                saga.setDroneId(droneEvent.getDroneId());
+                saga.markStepCompleted(SagaStep.DRONE_ASSIGNMENT);
+                sagaRepository.save(saga);
+                logger.info("SAGA {}: Drone assigned notification received (DroneID: {})",
+                        saga.getSagaId(), droneEvent.getDroneId());
 
-            logger.info("SAGA {}: Delivery scheduled with ID {}",
-                    saga.getSagaId(), deliveryId);
-
-            // Move to next step
-            assignDrone(saga);
-
-        } catch (Exception e) {
-            logger.error("SAGA {}: Delivery scheduling failed", saga.getSagaId(), e);
-            handleDeliveryFailure(saga, e.getMessage());
+                // Trigger SAGA Completion
+                completeOrderSaga(saga);
+            }
         }
-    }
-
-    /**
-     * Step 3: Assign drone
-     */
-    private void assignDrone(OrderSagaState saga) {
-        logger.info("SAGA {}: Assigning drone for order {}",
-                saga.getSagaId(), saga.getOrderId());
-
-        try {
-            // Drone assignment happens via the normal flow (already implemented)
-            // We just track it in the SAGA
-
-            // Simulate drone assignment
-            String droneId = UUID.randomUUID().toString();
-            saga.setDroneId(droneId);
-
-            // Mark step completed
-            saga.markStepCompleted(SagaStep.DRONE_ASSIGNMENT);
-            saga.moveToNextStep();
-            sagaRepository.save(saga);
-
-            // Publish success event
-            DroneAssignedEvent event = new DroneAssignedEvent(
-                    saga.getSagaId(), saga.getOrderId(), droneId, LocalDateTime.now()
-            );
-            rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE,
-                    "saga.drone.assigned", event);
-
-            logger.info("SAGA {}: Drone assigned with ID {}", saga.getSagaId(), droneId);
-
-            // SAGA completed successfully
-            completeOrderSaga(saga);
-
-        } catch (Exception e) {
-            logger.error("SAGA {}: Drone assignment failed", saga.getSagaId(), e);
-            handleDroneFailure(saga, e.getMessage());
-        }
+        // Other events (like OrderSagaStartedEvent) are ignored by the orchestrator
+        // as they don't trigger state machine transitions.
     }
 
     /**

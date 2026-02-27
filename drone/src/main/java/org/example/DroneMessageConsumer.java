@@ -34,30 +34,15 @@ public class DroneMessageConsumer {
     @RabbitListener(queues = RabbitMqConfig.DRONE_QUEUE)
     public void processOrderMessage(OrderMessage orderMessage) {
         try {
-            if (orderMessage.orderId() == null || orderMessage.orderId().isEmpty()) {
-                throw new IllegalArgumentException("Order ID cannot be null or empty");
-            }
-
             logger.info("Received order message: {}", orderMessage);
+            Random rand = new Random();
+            int sleepMinutes = rand.nextInt(orderMessage.maxDeliveryTimeMinutes()) + 1;
 
-            // Process delivery asynchronously using event sourcing
-            Thread thread = new Thread(() -> {
-                Random rand = new Random();
-                int sleepMinutes = rand.nextInt(orderMessage.maxDeliveryTimeMinutes()) + 1;
-
-                logger.info("Processing delivery for order {} (estimated {} minutes)",
-                        orderMessage.orderId(), sleepMinutes);
-
-                // Use DroneService which implements event sourcing
-                droneService.processDroneDelivery(orderMessage, sleepMinutes);
-
-                logger.info("Completed delivery for order {}", orderMessage.orderId());
-            });
-
-            thread.start();
+            // Avviamo il drone senza bloccare nessun thread!
+            droneService.startDroneDelivery(orderMessage, sleepMinutes);
 
         } catch (Exception e) {
-            logger.error("Error processing order message: {}", orderMessage, e);
+            logger.error("Error processing order message", e);
             throw e;
         }
     }

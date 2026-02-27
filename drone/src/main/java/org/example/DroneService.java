@@ -2,6 +2,8 @@ package org.example;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,13 +14,15 @@ import java.time.LocalDateTime;
  */
 @Service
 public class DroneService {
+    private final RabbitTemplate rabbitTemplate;
     private static final Logger logger = LoggerFactory.getLogger(DroneService.class);
     private final DroneEventStore eventStore;
     private final DroneController controller;
 
-    public DroneService(DroneEventStore eventStore, DroneController controller) {
+    public DroneService(RabbitTemplate rabbitTemplate, DroneEventStore eventStore, DroneController controller) {
         this.eventStore = eventStore;
         this.controller = controller;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     /**
@@ -27,7 +31,7 @@ public class DroneService {
     public Drone createDrone(OrderMessage order) {
         Drone drone = new Drone(order);
 
-        // Create and store the DRONE_CREATED event
+        // Create and store the DRONE_CREATED event (for Event Sourcing)
         DroneCreatedEvent event = new DroneCreatedEvent(
                 drone.getId(),
                 order.orderId(),
@@ -42,6 +46,11 @@ public class DroneService {
 
         eventStore.saveEvent(event);
         logger.info("Created drone {} for order {}", drone.getId(), order.orderId());
+
+        DroneAssignedEvent sagaEvent = new DroneAssignedEvent(
+                "unknown", order.orderId(), drone.getId(), LocalDateTime.now()
+        );
+        rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE, "saga.drone.assigned", sagaEvent);
 
         return drone;
     }
@@ -108,30 +117,40 @@ public class DroneService {
     }
 
     /**
-     * Process a complete drone delivery lifecycle with event sourcing
+     * Process a drone delivery asynchronously (Replaces the old sleep logic)
      */
-    public void processDroneDelivery(OrderMessage order, int sleepMinutes) {
-        // Create drone and record event
+    public void startDroneDelivery(OrderMessage order, int sleepMinutes) {
+        // Create drone (this also sends the SAGA assigned event)
         Drone drone = createDrone(order);
-
-        // Dispatch drone and record event
         drone.start();
+
+        drone.setExpectedArrivalTime(LocalDateTime.now().plusMinutes(sleepMinutes));
+
         dispatchDrone(drone.getId(), order.orderId());
         controller.attachDrone(order.orderId(), drone);
+        logger.info("Drone {} left. It will be to you in {} minutes", drone.getId(), sleepMinutes);
+    }
 
-        try {
-            // Simulate delivery time
-            Thread.sleep(sleepMinutes * 60_000L);
+    /**
+     * Scheduler that checks periodically which drones have arrived
+     */
+    @Scheduled(fixedRate = 60000)
+    public void checkArrivedDrones() {
+        LocalDateTime now = LocalDateTime.now();
 
-            // Complete delivery and record events
-            drone.end();
-            completeDroneDelivery(drone.getId(), order.orderId());
-            recordDroneReturn(drone.getId(), order.orderId());
+        for (Drone drone : controller.getCurrentDispatchedDrones().values()) {
+            if (drone.getState() == DroneState.InTransit &&
+                    drone.getExpectedArrivalTime() != null &&
+                    now.isAfter(drone.getExpectedArrivalTime())) {
 
-            controller.detachDrone(drone.getId());
-        } catch (InterruptedException e) {
-            logger.error("Delivery interrupted for drone {}", drone.getId(), e);
-            Thread.currentThread().interrupt();
+                logger.info("Drone {} arrived at destination!", drone.getId());
+
+                drone.end();
+                completeDroneDelivery(drone.getId(), drone.getOrder().orderId());
+                recordDroneReturn(drone.getId(), drone.getOrder().orderId());
+
+                controller.detachDrone(drone.getId());
+            }
         }
     }
 }

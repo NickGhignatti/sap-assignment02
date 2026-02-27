@@ -81,9 +81,9 @@ public class SagaEventListener {
     /**
      * Log SAGA events for monitoring
      */
-    @RabbitListener(queues = RabbitMqConfig.SAGA_EVENTS_QUEUE)
-    public void logSagaEvent(SagaEvent event) {
-        logger.info("SAGA Event: {} - {} for order {}",
-                event.getEventType(), event.getSagaId(), event.getOrderId());
-    }
+//    @RabbitListener(queues = RabbitMqConfig.SAGA_EVENTS_QUEUE)
+//    public void logSagaEvent(SagaEvent event) {
+//        logger.info("SAGA Event: {} - {} for order {}",
+//                event.getEventType(), event.getSagaId(), event.getOrderId());
+//    }
 }
