@@ -6,4 +6,4 @@ Pattern applied:
 - [x] Metrics
 - [x] Event sourcing
 - [x] SAGA
-- [ ] ???
+- [x] Distributed Tracing

@@ -9,11 +9,19 @@ spring:
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASS:guest}
     port: 5672
+    template:
+      observation-enabled: true
+    listener:
+      simple:
+        observation-enabled: true
 
 server:
   port: 8080
 
 management:
+  tracing:
+    sampling:
+      probability: 1.0
   endpoints:
     web:
       exposure:
@@ -24,3 +32,8 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+
+logging:
+  level:
+    root: WARN
+    org.example: INFO

@@ -14,6 +14,8 @@ services:
       - drone
       - prometheus
       - mongodb
+    logging:
+      driver: "none"
 
   rabbitmq:
     image: rabbitmq:3.13-management
@@ -30,6 +32,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "none"
 
   mongodb:
     image: mongo:latest
@@ -38,6 +42,8 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    logging:
+      driver: "none"
 
   customer:
     build:
@@ -96,6 +102,8 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--web.external-url=/prometheus'
+    logging:
+      driver: "none"
 
 volumes:
   caddy_data:
