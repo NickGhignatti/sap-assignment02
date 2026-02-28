@@ -147,8 +147,7 @@ public class OrderSagaOrchestrator {
         // Generic Log
         logger.info("SAGA Event Received: {} for order {}", event.getEventType(), event.getOrderId());
 
-        if (event instanceof DeliveryScheduledEvent) {
-            DeliveryScheduledEvent deliveryEvent = (DeliveryScheduledEvent) event;
+        if (event instanceof DeliveryScheduledEvent deliveryEvent) {
 
             OrderSagaState saga = sagaRepository.findByOrderId(deliveryEvent.getOrderId()).orElse(null);
             if (saga != null) {
@@ -160,13 +159,13 @@ public class OrderSagaOrchestrator {
                         saga.getSagaId(), deliveryEvent.getDeliveryId());
             }
 
-        } else if (event instanceof DroneAssignedEvent) {
-            DroneAssignedEvent droneEvent = (DroneAssignedEvent) event;
+        } else if (event instanceof DroneAssignedEvent droneEvent) {
 
             OrderSagaState saga = sagaRepository.findByOrderId(droneEvent.getOrderId()).orElse(null);
             if (saga != null) {
                 saga.setDroneId(droneEvent.getDroneId());
                 saga.markStepCompleted(SagaStep.DRONE_ASSIGNMENT);
+                saga.moveToNextStep();
                 sagaRepository.save(saga);
                 logger.info("SAGA {}: Drone assigned notification received (DroneID: {})",
                         saga.getSagaId(), droneEvent.getDroneId());
@@ -175,8 +174,6 @@ public class OrderSagaOrchestrator {
                 completeOrderSaga(saga);
             }
         }
-        // Other events (like OrderSagaStartedEvent) are ignored by the orchestrator
-        // as they don't trigger state machine transitions.
     }
 
     /**
@@ -211,7 +208,7 @@ public class OrderSagaOrchestrator {
                 saga.getSagaId(), saga.getOrderId(), reason, LocalDateTime.now()
         );
         rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE,
-                "saga.validation.failed", event);
+                "saga.validation_failed", event);
 
         logger.error("SAGA {}: Failed at validation - {}", saga.getSagaId(), reason);
 
@@ -228,7 +225,7 @@ public class OrderSagaOrchestrator {
                 saga.getSagaId(), saga.getOrderId(), reason, LocalDateTime.now()
         );
         rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE,
-                "saga.delivery.failed", event);
+                "saga.delivery_failed", event);
 
         logger.error("SAGA {}: Failed at delivery scheduling - {}",
                 saga.getSagaId(), reason);
@@ -246,7 +243,7 @@ public class OrderSagaOrchestrator {
                 saga.getSagaId(), saga.getOrderId(), reason, LocalDateTime.now()
         );
         rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE,
-                "saga.drone.failed", event);
+                "saga.drone_failed", event);
 
         logger.error("SAGA {}: Failed at drone assignment - {}",
                 saga.getSagaId(), reason);
@@ -295,7 +292,7 @@ public class OrderSagaOrchestrator {
                 saga.getFailureReason(), LocalDateTime.now()
         );
         rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE,
-                "saga.compensate.order", event);
+                "saga.compensate_order", event);
     }
 
     private void compensateDelivery(OrderSagaState saga) {
@@ -306,7 +303,7 @@ public class OrderSagaOrchestrator {
                 saga.getFailureReason(), LocalDateTime.now()
         );
         rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE,
-                "saga.compensate.delivery", event);
+                "saga.compensate_delivery", event);
     }
 
     private void compensateDrone(OrderSagaState saga) {
@@ -317,7 +314,7 @@ public class OrderSagaOrchestrator {
                 saga.getFailureReason(), LocalDateTime.now()
         );
         rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE,
-                "saga.compensate.drone", event);
+                "saga.compensate_drone", event);
     }
 
     private void cancelOrder(OrderSagaState saga, String reason) {

@@ -128,9 +128,7 @@ public class DroneEventStore {
                 drone.start();
             } else if (event instanceof DroneDeliveredEvent) {
                 drone.end();
-            } else if (event instanceof DroneReturnedEvent) {
-                // Drone is already in returning state from end()
-            }
+            }  // Drone is already in returning state from end()
         }
 
         return drone;

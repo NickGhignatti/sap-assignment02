@@ -63,9 +63,12 @@ services:
       dockerfile: delivery/Dockerfile
     environment:
       RABBITMQ_HOST: rabbitmq
+      MONGODB_URI: mongodb://mongodb:27017/delivery_db
     depends_on:
       rabbitmq:
         condition: service_healthy
+      mongodb:
+        condition: service_started
 
   drone:
     build:

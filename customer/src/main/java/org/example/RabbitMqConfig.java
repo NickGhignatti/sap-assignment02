@@ -67,7 +67,7 @@ public class RabbitMqConfig {
     public Binding sagaEventsBinding(Queue sagaEventsQueue, TopicExchange sagaEventsExchange) {
         return BindingBuilder.bind(sagaEventsQueue)
                 .to(sagaEventsExchange)
-                .with("saga.*");
+                .with("saga.order.*");
     }
 
     // Bindings for compensation events
@@ -76,7 +76,7 @@ public class RabbitMqConfig {
                                            TopicExchange sagaEventsExchange) {
         return BindingBuilder.bind(sagaCompensationQueue)
                 .to(sagaEventsExchange)
-                .with("saga.compensate.*");
+                .with("saga.compensate_order");
     }
 
     @Bean

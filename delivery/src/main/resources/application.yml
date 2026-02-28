@@ -1,6 +1,9 @@
 spring:
   application:
     name: delivery-service
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/delivery_db}
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     username: ${RABBITMQ_USER:guest}

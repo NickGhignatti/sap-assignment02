@@ -38,7 +38,6 @@ public class DroneMessageConsumer {
             Random rand = new Random();
             int sleepMinutes = rand.nextInt(orderMessage.maxDeliveryTimeMinutes()) + 1;
 
-            // Avviamo il drone senza bloccare nessun thread!
             droneService.startDroneDelivery(orderMessage, sleepMinutes);
 
         } catch (Exception e) {

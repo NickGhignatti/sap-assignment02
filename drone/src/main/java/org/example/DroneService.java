@@ -50,7 +50,7 @@ public class DroneService {
         DroneAssignedEvent sagaEvent = new DroneAssignedEvent(
                 "unknown", order.orderId(), drone.getId(), LocalDateTime.now()
         );
-        rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE, "saga.drone.assigned", sagaEvent);
+        rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE, "saga.drone_assigned", sagaEvent);
 
         return drone;
     }
@@ -134,7 +134,7 @@ public class DroneService {
     /**
      * Scheduler that checks periodically which drones have arrived
      */
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 10000)
     public void checkArrivedDrones() {
         LocalDateTime now = LocalDateTime.now();
 

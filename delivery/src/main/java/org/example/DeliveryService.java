@@ -34,6 +34,6 @@ public class DeliveryService {
                 deliveryId,
                 LocalDateTime.now()
         );
-        rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE, "saga.delivery.scheduled", event);
+        rabbitTemplate.convertAndSend(RabbitMqConfig.SAGA_EVENTS_EXCHANGE, "saga.delivery_scheduled", event);
     }
 }
