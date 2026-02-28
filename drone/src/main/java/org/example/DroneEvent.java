@@ -1,7 +1,6 @@
 package org.example;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.*;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +15,7 @@ import java.time.LocalDateTime;
         @JsonSubTypes.Type(value = DroneDeliveredEvent.class, name = "DRONE_DELIVERED"),
         @JsonSubTypes.Type(value = DroneReturnedEvent.class, name = "DRONE_RETURNED")
 })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class DroneEvent {
     private final String droneId;
     private final String orderId;
@@ -45,6 +45,7 @@ public abstract class DroneEvent {
         return version;
     }
 
+    @JsonIgnore
     public abstract String getEventType();
 }
 
@@ -58,10 +59,16 @@ class DroneCreatedEvent extends DroneEvent {
     private final LocalDateTime requestedDeliveryTime;
     private final int maxDeliveryTimeMinutes;
 
-    public DroneCreatedEvent(String droneId, String orderId, String fromAddress,
-                             String toAddress, double packageWeight,
-                             LocalDateTime requestedDeliveryTime, int maxDeliveryTimeMinutes,
-                             LocalDateTime timestamp, long version) {
+    @JsonCreator
+    public DroneCreatedEvent(@JsonProperty("droneId") String droneId,
+                             @JsonProperty("orderId") String orderId,
+                             @JsonProperty("fromAddress") String fromAddress,
+                             @JsonProperty("toAddress") String toAddress,
+                             @JsonProperty("packageWeight") double packageWeight,
+                             @JsonProperty("requestedDeliveryTime") LocalDateTime requestedDeliveryTime,
+                             @JsonProperty("maxDeliveryTimeMinutes") int maxDeliveryTimeMinutes,
+                             @JsonProperty("timestamp") LocalDateTime timestamp,
+                             @JsonProperty("version") long version) {
         super(droneId, orderId, timestamp, version);
         this.fromAddress = fromAddress;
         this.toAddress = toAddress;
@@ -88,9 +95,12 @@ class DroneCreatedEvent extends DroneEvent {
 class DroneDispatchedEvent extends DroneEvent {
     private final LocalDateTime dispatchTime;
 
-    public DroneDispatchedEvent(String droneId, String orderId,
-                                LocalDateTime dispatchTime,
-                                LocalDateTime timestamp, long version) {
+    @JsonCreator
+    public DroneDispatchedEvent(@JsonProperty("droneId") String droneId,
+                                @JsonProperty("orderId") String orderId,
+                                @JsonProperty("dispatchTime") LocalDateTime dispatchTime,
+                                @JsonProperty("timestamp") LocalDateTime timestamp,
+                                @JsonProperty("version") long version) {
         super(droneId, orderId, timestamp, version);
         this.dispatchTime = dispatchTime;
     }
@@ -111,9 +121,12 @@ class DroneDispatchedEvent extends DroneEvent {
 class DroneDeliveredEvent extends DroneEvent {
     private final LocalDateTime deliveryTime;
 
-    public DroneDeliveredEvent(String droneId, String orderId,
-                               LocalDateTime deliveryTime,
-                               LocalDateTime timestamp, long version) {
+    @JsonCreator
+    public DroneDeliveredEvent(@JsonProperty("droneId") String droneId,
+                               @JsonProperty("orderId") String orderId,
+                               @JsonProperty("deliveryTime") LocalDateTime deliveryTime,
+                               @JsonProperty("timestamp") LocalDateTime timestamp,
+                               @JsonProperty("version") long version) {
         super(droneId, orderId, timestamp, version);
         this.deliveryTime = deliveryTime;
     }
@@ -134,9 +147,12 @@ class DroneDeliveredEvent extends DroneEvent {
 class DroneReturnedEvent extends DroneEvent {
     private final LocalDateTime returnTime;
 
-    public DroneReturnedEvent(String droneId, String orderId,
-                              LocalDateTime returnTime,
-                              LocalDateTime timestamp, long version) {
+    @JsonCreator
+    public DroneReturnedEvent(@JsonProperty("droneId") String droneId,
+                              @JsonProperty("orderId") String orderId,
+                              @JsonProperty("returnTime") LocalDateTime returnTime,
+                              @JsonProperty("timestamp") LocalDateTime timestamp,
+                              @JsonProperty("version") long version) {
         super(droneId, orderId, timestamp, version);
         this.returnTime = returnTime;
     }

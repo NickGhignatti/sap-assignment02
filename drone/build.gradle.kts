@@ -32,6 +32,9 @@ dependencies {
 
     // Mongo
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+
+    // ... le tue altre dipendenze ...
+    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.11.0")
 }
 
 tasks.test {
